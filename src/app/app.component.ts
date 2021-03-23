@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { Todo } from 'models/todo.model';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Todo } from 'src/models/todo.model';
 
 @Component({
   selector: 'app-root',
@@ -8,37 +9,74 @@ import { Todo } from 'models/todo.model';
 })
 export class AppComponent {
   //variavel vazia e o tipo any aceita qualquer tipo
-  public todos : Todo[] = [];
+  public todos: Todo[] = [];
   public title: String = 'Minhas tarefas';
+  public form: FormGroup;
   //variavel undefined
   //public todos : any[];
 
-  //this ajuda a ter acesso as variaveis e a todo escopo da minha classe
+  //ctor cria um construtor
+  //this ajuda a ter acesso as variaveis, classes, a todo escopo da minha classe
   //com o push incluo itens no minha lista todos
-  constructor() {
-    this.todos.push(new Todo(1, 'Passear com o cachorro', false));
-    this.todos.push(new Todo(2, 'ir ao mercado', false));
-    this.todos.push(new Todo(3, 'Ir pra Jana', true));
+  /*
+  Foi criado um form group com as validações seguintes
+  Foi incluso os imports FormBuilder, FormGroup e Validators
+  */
+  constructor(private fb: FormBuilder) {
+    this.form = this.fb.group({
+      title: ['', Validators.compose([
+        Validators.minLength(3),
+        Validators.maxLength(60),
+        Validators.required,
+      ])]
+    });
+
+    this.load();
   }
 
-//pego a posição do meu todo e passo a index e quantidade de remoção
-//para o splice remover 
+add() {
+  const title = this.form.controls['title'].value;
+  const id = this.todos.length + 1;
+  this.todos.push(new Todo(id, title, false));
+  this.save();
+  this.clear();
+}
+
+//clear limpa as informações apos adicionar por exemplo.
+clear() {
+  this.form.reset();
+}
+
+//pego a posição do meu todo atraves do indexOf e no splite faço a remoção passando a posição e a quantidade de remoção
 remove(todo: Todo) {
   const index = this.todos.indexOf(todo);
   if (index !== -1) {
     this.todos.splice(index, 1);
+    this.save();
   }
 }
 
 markAsDone(todo: Todo) {
   todo.done = true;
+  this.save();
 }
 
 markAsUndone(todo: Todo) {
   todo.done = false;
+  this.save();
 }
 
-  alteraTexto() {
-    this.title = 'Teste';
+save() {
+  const data = JSON.stringify(this.todos);
+  localStorage.setItem('todos', data);
+}
+
+load() {
+  const data = localStorage.getItem('todos');
+  if (data) {
+    this.todos = JSON.parse(data);
+  } else {
+    this.todos = []; 
   }
+}
 }

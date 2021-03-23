@@ -1,13 +1,28 @@
+<!--Colocar a variavel entre chaves-->
 <h1>{{ title }}</h1>
-<button (click)="alteraTexto()">Alterar</button>
 <ul>
   <!--*ngFor faço uma for pra percorrer minha lista-->
-  <!--*ngIf faço condições que desejo
-      (click) chamo o click do meu button e paço o evento que desejo    
+  <!--
+    *ngIf faço condições que desejo
+    (click) chamo o evento click para o meu button e passo o metodo que desejo executar.    
   -->
+  <p *ngIf="todos.length==0"><small>Não tem nenhuma tarefa hoje!</small></p>
   <li *ngFor="let todo of todos">{{ todo.id }}. {{ todo.title }} - 
   <button *ngIf="!todo.done" (click)="markAsDone(todo)">Concluir</button>
   <button *ngIf="todo.done" (click)="markAsUndone(todo)">Refazer</button> |
   <button (click)="remove(todo)">Remover</button>
   </li>
 </ul>
+
+<!--
+  Foi criado um form com um input do texto da Tarefa
+  no small só é mostrado a mensagem caso o titulo seja invalido e o titulo nao for modificado
+-->
+<form [formGroup]="form">
+  <fieldset>
+      <label>Tarefa: </label>
+      <input type="text" placeholder="Titulo da Tarefa" maxlength="60" formControlName="title">
+      <small *ngIf="form.controls.title.invalid && !form.controls.title.pristine">Este campo deve conter entre 3 e 60 caracteres</small>
+      <button [disabled]="form.invalid" (click)="add()">Salvar</button>
+  </fieldset>
+</form>
